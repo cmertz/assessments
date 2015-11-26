@@ -1,0 +1,22 @@
+Entwickeln Sie mit Java einen Prototypen für das Backend System von XXX unter Verwendung des
+Spring Frameworks. Dabei sollen folgende Anforderungen erfüllt werden:
+• Interne Benutzer können sich mit Benutzernamen und Passwort am System anmelden
+• Benutzer lassen sich deaktivieren
+• Transaktionen lassen sich anzeigen und durchsuchen
+• Transaktionen können folgende Zustände haben:
+• pending (Transaktion wurde noch nicht bezahlt)
+• cancelled (10 Tage nach Erstellung der Transaktion immer noch nicht bezahlt)
+• done (Transaktion bezahlt)
+• Transaktionen enthalten außerdem:
+• E-Mail-Adresse des Kunden
+• Online-Shop, von dem Transaktion ausgelöst wurde
+• Betrag
+• 13-stellige Nummer zur Identiﬁkation (Barcode)
+• Transaktionen können über eine HTTP-Schnittstelle (API) bezahlt werden
+• Barcode wird dazu übertragen
+• bei Bezahlung wird
+• Transaktion als “Bezahlt” markiert
+• es wird festgehalten von welchem Ofﬂine-Partner bezahlt wurde (Bsp: Rewe, Netto etc.)
+• Statistik
+• Anzahl der Transaktionen: täglich, quartalsweise, jährlich
+• Prozentuale Angabe darüber wie viele Transaktionen zum gegenwärtigen Zeitpunkt in welchem Status stehen
