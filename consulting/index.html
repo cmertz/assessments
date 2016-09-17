@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+
+    <title>Test Codecentric</title>
+
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+
+    <style type="text/css">
+      ol {list-style: none;}
+      #employees>li:before {content: "– ";}
+      #employees>li {margin-bottom: 10px;}
+    </style>
+  </head>
+
+  <body>
+    <script>
+      var reposByLanguage = {};
+      var language = "";
+
+      function getGithubData(organization, username, password, reposByLanguage) {
+        $.ajax({
+          dataType: "json",
+          url: "https://api.github.com/orgs/" + organization + "/members",
+          data: {per_page: 100}
+        }).done(function(employees) {
+          employees.forEach(function(employee) {
+            $.ajax({
+              dataType: "json",
+              url: "https://api.github.com/users/" + employee.login + "/repos",
+              data: {per_page: 100}
+            }).done(function(repos) {
+              reposByLanguage[employee.login] = repos.reduce(function(memo, repo) {
+                var language = repo.language || "null"; // github api returns null on some repositories
+                language = language.toLowerCase();
+
+                memo[language] = memo[language] || 0;
+                memo[language] += 1;
+
+                return memo;
+              },{});
+
+              updateHTMLList();
+            });
+          });
+        });
+      }
+
+      function rankByLanguage(repos, language) {
+        return Object.keys(repos).reduce(function(memo, employee) {
+          if(reposByLanguage[employee][language] != undefined) {
+            memo.push({employee: employee, count: reposByLanguage[employee][language]}) ;
+          }
+
+          return memo;
+        }, []).sort(function(a,b) {
+          return b.count - a.count;
+        });
+      }
+
+      function unfilteredEmployeeList(repos) {
+        return Object.keys(repos).reduce(function(memo, employee) {
+          var projectsList = Object.keys(reposByLanguage[employee]).reduce(function(memo, language) {
+            memo.push({language: language, count: reposByLanguage[employee][language]});
+
+            return memo;
+          }, []).sort(function(a,b) {
+            return b.count - a.count;
+          }).reduce(function(memo, entry) {
+            return memo + "<li>" + entry.language + " " + entry.count + "</li>";
+          }, "");
+
+          return memo + "<li>Mitarbeiter " + employee + "<ol>" + projectsList + "</ol></li>";
+        }, "");
+      }
+
+      function filteredEmployeeList(reposByLanguage, language) {
+        return rankByLanguage(reposByLanguage, language).reduce(function(memo, entry) {
+          return memo + "<li>" + entry.employee + " - " + entry.count + "</li>";
+        }, "");
+      }
+
+      function updateHTMLList() {
+        language = $("#language-input").val().toLowerCase();
+
+        if(language == undefined || language == ""){
+          $("#employees").html(unfilteredEmployeeList(reposByLanguage));
+        } else {
+          $("#employees").html(filteredEmployeeList(reposByLanguage, language));
+        }
+      }
+
+      $(document).ready(function() {
+        language = localStorage.getItem("language");
+        language = language || "";
+        $("#language-input").val(language);
+
+        reposByLanguage = localStorage.getItem("reposByLanguage");
+        if(reposByLanguage == undefined) {
+          reposByLanguage = {};
+          getGithubData("codecentric", username, password, reposByLanguage);
+        } else {
+          reposByLanguage = JSON.parse(reposByLanguage);
+        }
+
+        updateHTMLList();
+      });
+
+      $(window).on("unload", function() {
+        localStorage.setItem("language", language);
+        localStorage.setItem("reposByLanguage", JSON.stringify(reposByLanguage));
+      });
+    </script>
+
+    <form>
+      <input type="text" id="language-input" oninput="updateHTMLList()">
+    </form>
+
+    <ol id="employees"></ol>
+  </body>
+</html>
