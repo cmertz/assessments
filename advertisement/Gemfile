@@ -1,0 +1,13 @@
+source 'https://rubygems.org'
+
+ruby '2.3.1'
+
+gem 'httparty'
+gem 'minitest'
+gem 'rack-test'
+gem 'rake'
+gem 'simplecov'
+gem 'sinatra'
+gem 'timecop'
+gem 'vcr'
+gem 'webmock'

@@ -1,0 +1,43 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://api.fyber.com/feed/v1/offers.json?appid=157&apple_idfa=&apple_idfa_tracking_enabled=false&device_id=2b6f0cc904d137be2e1730235f5664094b83&hashkey=b50c5fbd175ed5b8fb6ef3978b73a1b71a023a86&ip=109.235.143.113&locale=de&offer_types=112&os_version=&timestamp=1473624051&uid=player1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 401
+      message: Unauthorized
+    headers:
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '119'
+      Status:
+      - 401 Unauthorized
+      Date:
+      - Sun, 11 Sep 2016 20:00:51 GMT
+      X-Runtime:
+      - '0.005397'
+      X-Rack-Cache:
+      - miss
+      X-Powered-By:
+      - Phusion Passenger Enterprise 5.0.13
+      Server:
+      - nginx + Phusion Passenger 5.0.13
+    body:
+      encoding: UTF-8
+      string: '{"code":"ERROR_INVALID_HASHKEY","message":"An invalid hashkey for this
+        appid was given as a parameter in the request."}'
+    http_version:
+  recorded_at: Sun, 11 Sep 2016 20:00:51 GMT
+recorded_with: VCR 3.0.3

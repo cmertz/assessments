@@ -1,0 +1,9 @@
+require 'rake/testtask'
+
+task default: :test
+
+Rake::TestTask.new do |t|
+  t.libs << File.join(File.dirname(__FILE__), 'config')
+  t.libs << File.join(File.dirname(__FILE__), 'spec')
+  t.pattern = 'spec/**/*_spec.rb'
+end

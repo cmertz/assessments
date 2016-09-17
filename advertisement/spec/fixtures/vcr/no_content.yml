@@ -1,0 +1,60 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://api.fyber.com/feed/v1/offers.json?appid=157&apple_idfa=&apple_idfa_tracking_enabled=false&device_id=2b6f0cc904d137be2e1730235f5664094b83&hashkey=f9ec7c6c9f5a83912deae9c982d972523462490b&ip=109.235.143.113&locale=de&offer_types=112&os_version=&timestamp=1473622844&uid=player1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Status:
+      - 200 OK
+      X-Sponsorpay-Response-Signature:
+      - e7cc0782ee4bc04a8523561d9d376e0abaa4ed78
+      X-Rack-Cache:
+      - miss
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Date:
+      - Sun, 11 Sep 2016 19:40:45 GMT
+      Pragma:
+      - no-cache
+      P3p:
+      - CP="NON DSP COR CURa IVAa IVDa CONa OUR NOR STA"
+      X-Sponsorpay-Response-Code:
+      - NO_CONTENT
+      X-Ua-Compatible:
+      - IE=Edge,chrome=1
+      Etag:
+      - W/"aed1a8791604eb1f0185ff7d47b322ca"
+      X-Runtime:
+      - '1.464764'
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      X-Powered-By:
+      - Phusion Passenger Enterprise 5.0.13
+      Server:
+      - nginx + Phusion Passenger 5.0.13
+    body:
+      encoding: ASCII-8BIT
+      string: '{"code":"NO_CONTENT","message":"Successful request, but no offers are
+        currently available for this user.","count":0,"pages":0,"information":{"app_name":"Demo
+        iframe for publisher - do not touch","appid":157,"virtual_currency":"Coins","virtual_currency_sale_enabled":false,"country":"DE","language":"DE","support_url":"http://offer.fyber.com/mobile/support?appid=157&client=api&uid=player1"},"offers":[]}'
+    http_version: 
+  recorded_at: Sun, 11 Sep 2016 19:40:45 GMT
+recorded_with: VCR 3.0.3
