@@ -25,31 +25,22 @@ func addScheme(addrs []string) []string {
 	return res
 }
 
-func main() {
-	var parallel int
-	flag.IntVar(&parallel, "parallel", 10, "number of concurrent http requests")
-	flag.Parse()
-
-	if parallel < 0 {
-		log.Fatalf("negative number of concurrent http requests given (%d)\n", parallel)
-	}
-
+func process(ctx context.Context, addresses []string, parallel int) {
 	var wg sync.WaitGroup
 	wg.Add(parallel)
 
 	addrs := make(chan string)
 
-	// this should not really matter given the max number of addresses we can pass
-	// as command line args. For the sake of completeness we add it anyways.
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
-	defer stop()
-
 	go func() {
 	outer:
-		for _, addr := range addScheme(flag.Args()) {
+		for _, addr := range addresses {
 			select {
 			case addrs <- addr:
 			case <-ctx.Done():
+
+				// this should properly propagate any "cancelation signal"
+				// to other goroutines via the closing of the channel
+				// below
 				break outer
 			}
 		}
@@ -68,4 +59,21 @@ func main() {
 	}
 
 	wg.Wait()
+}
+
+func main() {
+	var parallel int
+	flag.IntVar(&parallel, "parallel", 10, "number of concurrent http requests")
+	flag.Parse()
+
+	if parallel < 0 {
+		log.Fatalf("negative number of concurrent http requests given (%d)\n", parallel)
+	}
+
+	// this should not really matter given the max number of addresses we can pass
+	// as command line args. For the sake of completeness we add it anyways.
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+	defer stop()
+
+	process(ctx, addScheme(flag.Args()), parallel)
 }
