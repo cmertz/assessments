@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 )
 
 func addScheme(addrs []string) []string {
@@ -30,6 +31,28 @@ func main() {
 		log.Fatalf("negative number of concurrent http requests given (%d)\n", parallel)
 	}
 
-	// TODO REMOVEME
-	fmt.Println(addScheme(flag.Args()))
+	var wg sync.WaitGroup
+	wg.Add(parallel)
+
+	addrs := make(chan string)
+
+	go func() {
+		for _, addr := range addScheme(flag.Args()) {
+			addrs <- addr
+		}
+
+		close(addrs)
+	}()
+
+	for i := 0; i < parallel; i++ {
+		go func() {
+			for addr := range addrs {
+				fmt.Println(addr)
+			}
+
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
 }
