@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
+	"os/signal"
 	"strings"
 	"sync"
+	"syscall"
 )
 
 func addScheme(addrs []string) []string {
@@ -36,9 +39,19 @@ func main() {
 
 	addrs := make(chan string)
 
+	// this should not really matter given the max number of addresses we can pass
+	// as command line args. For the sake of completeness we add it anyways.
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+	defer stop()
+
 	go func() {
+	outer:
 		for _, addr := range addScheme(flag.Args()) {
-			addrs <- addr
+			select {
+			case addrs <- addr:
+			case <-ctx.Done():
+				break outer
+			}
 		}
 
 		close(addrs)
