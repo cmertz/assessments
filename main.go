@@ -75,7 +75,7 @@ func process(ctx context.Context, fetch fetchFunc, out io.Writer, addresses []st
 
 	go func() {
 		for res := range results {
-			_, err := fmt.Fprint(out, res)
+			_, err := fmt.Fprintln(out, res)
 			if err != nil {
 
 				// there is no point in continuing if we can't
