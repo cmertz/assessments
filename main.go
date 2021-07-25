@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -31,7 +32,13 @@ func addScheme(addrs []string) []string {
 type fetchFunc func(addr string) ([]byte, error)
 
 func fetch(addr string) ([]byte, error) {
-	return nil, nil
+	resp, err := http.Get(addr)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return io.ReadAll(resp.Body)
 }
 
 func process(ctx context.Context, fetch fetchFunc, out io.Writer, addresses []string, parallel int) {
