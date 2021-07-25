@@ -108,11 +108,12 @@ func process(ctx context.Context, fetch fetchFunc, out io.Writer, addresses []st
 func main() {
 	var parallel int
 
-	flag.IntVar(&parallel, "parallel", 10, "number of concurrent http requests")
+	// this should really be `concurrent` requests
+	flag.IntVar(&parallel, "parallel", 10, "number of parallel http requests")
 	flag.Parse()
 
 	if parallel < 0 {
-		log.Fatalf("negative number of concurrent http requests given (%d)\n", parallel)
+		log.Fatalf("negative number of parallel http requests given (%d)\n", parallel)
 	}
 
 	// this should not really matter given the max number of addresses we can pass
