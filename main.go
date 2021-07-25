@@ -40,6 +40,7 @@ func process(ctx context.Context, fetch fetchFunc, out io.Writer, addresses []st
 
 	addrs := make(chan string)
 	results := make(chan string)
+	done := make(chan struct{})
 
 	go func() {
 	outer:
@@ -83,6 +84,8 @@ func process(ctx context.Context, fetch fetchFunc, out io.Writer, addresses []st
 				panic(fmt.Sprintf("error writing results: %s\n", err))
 			}
 		}
+
+		done <- struct{}{}
 	}()
 
 	wg.Wait()
@@ -90,6 +93,8 @@ func process(ctx context.Context, fetch fetchFunc, out io.Writer, addresses []st
 	// the fetching goroutines should be done writing to the channel
 	// at this point, closing it ends the printing goroutine
 	close(results)
+
+	<-done
 }
 
 func main() {
