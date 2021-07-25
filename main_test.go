@@ -6,9 +6,10 @@ import (
 	"crypto/md5"
 	"fmt"
 	"strconv"
-	"sync/atomic"
 	"testing"
 )
+
+const defaultTestAddr = "http://example.com"
 
 func TestAddScheme(t *testing.T) {
 	cases := []struct {
@@ -54,30 +55,23 @@ func TestProcess(t *testing.T) {
 	}
 }
 
-func TestProcessParallel(t *testing.T) {
-	const testAddr = "http://example.com"
-	const parallel = 100
-
-	var numberOfFetchCalls uint32
-	fetch := func(string) ([]byte, error) {
-		atomic.AddUint32(&numberOfFetchCalls, 1)
-		return []byte(testAddr), nil
-	}
+func TestProcessMany(t *testing.T) {
+	const count = 100
 
 	var out bytes.Buffer
-	var in []string
+	var addrs []string
 	var expected string
 
-	for i := 0; i < parallel; i++ {
-		expected = fmt.Sprintf("%s%s %x\n", expected, testAddr, md5.Sum([]byte(testAddr)))
-		in = append(in, testAddr)
+	for i := 0; i < count; i++ {
+		expected = fmt.Sprintf("%s%s %x\n", expected, defaultTestAddr, md5.Sum([]byte(defaultTestAddr)))
+		addrs = append(addrs, defaultTestAddr)
 	}
 
-	process(context.Background(), fetch, &out, in, parallel)
-
-	if numberOfFetchCalls != parallel {
-		t.Errorf("expected %d calls to fetch function, got %d\n", parallel, numberOfFetchCalls)
+	fetch := func(string) ([]byte, error) {
+		return []byte(defaultTestAddr), nil
 	}
+
+	process(context.Background(), fetch, &out, addrs, count)
 
 	actual := out.String()
 	if actual != expected {
