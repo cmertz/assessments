@@ -11,6 +11,10 @@ import (
 
 const defaultTestAddr = "http://example.com"
 
+func testFetch(addr string) ([]byte, error) {
+	return []byte(addr), nil
+}
+
 func TestAddScheme(t *testing.T) {
 	cases := []struct {
 		addr           string
@@ -31,6 +35,8 @@ func TestAddScheme(t *testing.T) {
 	}
 
 	for i, c := range cases {
+		c := c
+
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			r := addScheme([]string{c.addr})
 
@@ -41,15 +47,14 @@ func TestAddScheme(t *testing.T) {
 	}
 }
 
-func TestProcess(t *testing.T) {
-	const testAddr = "http://example.com"
-
+func TestProcessSingle(t *testing.T) {
 	var out bytes.Buffer
 
-	process(context.Background(), func(string) ([]byte, error) { return []byte(testAddr), nil }, &out, []string{testAddr}, 1)
+	process(context.Background(), testFetch, &out, []string{defaultTestAddr}, 1)
 
-	expected := fmt.Sprintf("%s %x\n", testAddr, md5.Sum([]byte(testAddr)))
+	expected := fmt.Sprintf("%s %x\n", defaultTestAddr, md5.Sum([]byte(defaultTestAddr)))
 	actual := out.String()
+
 	if actual != expected {
 		t.Errorf("expected %s, got %s\n", expected, actual)
 	}
@@ -58,7 +63,6 @@ func TestProcess(t *testing.T) {
 func TestProcessMany(t *testing.T) {
 	const count = 100
 
-	var out bytes.Buffer
 	var addrs []string
 	var expected string
 
@@ -67,11 +71,9 @@ func TestProcessMany(t *testing.T) {
 		addrs = append(addrs, defaultTestAddr)
 	}
 
-	fetch := func(string) ([]byte, error) {
-		return []byte(defaultTestAddr), nil
-	}
+	var out bytes.Buffer
 
-	process(context.Background(), fetch, &out, addrs, count)
+	process(context.Background(), testFetch, &out, addrs, count)
 
 	actual := out.String()
 	if actual != expected {
@@ -80,33 +82,32 @@ func TestProcessMany(t *testing.T) {
 }
 
 func TestProcessCancelation(t *testing.T) {
-	const testAddr = "http://example.com"
-
 	var out bytes.Buffer
 
 	latch := make(chan struct{})
 	done := make(chan struct{})
 
-	fetch := func(string) ([]byte, error) {
+	fetch := func(addr string) ([]byte, error) {
 		latch <- struct{}{}
 		<-latch
-		return []byte(testAddr), nil
+
+		return testFetch(addr)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+
 	go func() {
-		process(ctx, fetch, &out, []string{testAddr, testAddr}, 1)
+		process(ctx, fetch, &out, []string{defaultTestAddr, defaultTestAddr}, 1)
 		done <- struct{}{}
 	}()
 
 	<-latch
 	cancel()
 	latch <- struct{}{}
-
 	<-done
 
 	actual := out.String()
-	expected := fmt.Sprintf("%s %x\n", testAddr, md5.Sum([]byte(testAddr)))
+	expected := fmt.Sprintf("%s %x\n", defaultTestAddr, md5.Sum([]byte(defaultTestAddr)))
 
 	if actual != expected {
 		t.Errorf("expected %s, got %s\n", expected, actual)
