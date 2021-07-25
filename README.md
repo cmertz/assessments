@@ -1,6 +1,6 @@
 # myhttp
 
-**This is a code for a coding challenge**
+**This is code for a coding challenge**
 
 Command line tool to fetch websites and output the md5 digest of their content.
 
