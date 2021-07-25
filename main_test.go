@@ -23,6 +23,10 @@ func TestAddScheme(t *testing.T) {
 			"b",
 			"http://b",
 		},
+		{
+			"https://c",
+			"https://c",
+		},
 	}
 
 	for i, c := range cases {

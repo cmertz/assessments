@@ -19,7 +19,7 @@ func addScheme(addrs []string) []string {
 	var res []string
 
 	for _, a := range addrs {
-		if !strings.HasPrefix(a, "http://") {
+		if !strings.HasPrefix(a, "http://") && !strings.HasPrefix(a, "https://") {
 			a = fmt.Sprintf("http://%s", a)
 		}
 
