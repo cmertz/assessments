@@ -34,7 +34,7 @@ type fetchFunc func(addr string) ([]byte, error)
 func fetch(addr string) ([]byte, error) {
 	resp, err := http.Get(addr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fetch: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -43,6 +43,7 @@ func fetch(addr string) ([]byte, error) {
 
 func process(ctx context.Context, fetch fetchFunc, out io.Writer, addresses []string, parallel int) {
 	var wg sync.WaitGroup
+
 	wg.Add(parallel)
 
 	addrs := make(chan string)
@@ -73,7 +74,7 @@ func process(ctx context.Context, fetch fetchFunc, out io.Writer, addresses []st
 				if err != nil {
 					results <- fmt.Sprintf("%s %s", addr, err)
 				} else {
-					results <- fmt.Sprintf("%s %x", addr, md5.Sum([]byte(content)))
+					results <- fmt.Sprintf("%s %x", addr, md5.Sum(content))
 				}
 			}
 
@@ -106,6 +107,7 @@ func process(ctx context.Context, fetch fetchFunc, out io.Writer, addresses []st
 
 func main() {
 	var parallel int
+
 	flag.IntVar(&parallel, "parallel", 10, "number of concurrent http requests")
 	flag.Parse()
 
