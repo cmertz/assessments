@@ -80,3 +80,37 @@ func TestProcessParallel(t *testing.T) {
 		t.Errorf("expected %s, got %s\n", expected, actual)
 	}
 }
+
+func TestProcessCancelation(t *testing.T) {
+	const testAddr = "http://example.com"
+
+	var out bytes.Buffer
+
+	latch := make(chan struct{})
+	done := make(chan struct{})
+
+	fetch := func(string) ([]byte, error) {
+		latch <- struct{}{}
+		<-latch
+		return []byte(testAddr), nil
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		process(ctx, fetch, &out, []string{testAddr, testAddr}, 1)
+		done <- struct{}{}
+	}()
+
+	<-latch
+	cancel()
+	latch <- struct{}{}
+
+	<-done
+
+	actual := out.String()
+	expected := fmt.Sprintf("%s %x\n", testAddr, md5.Sum([]byte(testAddr)))
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s\n", expected, actual)
+	}
+}
